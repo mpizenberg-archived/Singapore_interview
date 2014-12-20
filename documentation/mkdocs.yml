@@ -7,6 +7,10 @@ site_dir: ../../Singapore_interview_gh-pages
 
 pages:
     - ['index.md', 'Introduction']
+    - ['install.md', 'Installation']
+    - ['extraction.md', 'Frame extraction']
+    - ['superpixel.md', 'Superpixels segmentation']
+    - ['box.md', 'Boundary box']
     - ['doc.md', 'Building this documentation']
 
 theme: readthedocs
