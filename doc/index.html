@@ -111,6 +111,31 @@
             <div class="section">
               <h1 id="building-this-very-documentation">Building this very documentation</h1>
 <p>Here I explain how I built this very documentation.</p>
+<h2 id="mkdocs-documentation-with-markdown-files">MkDocs : documentation with markdown files</h2>
+<p>I needed to make a simple and quick documentation, therefore the markdown language seemed adapted.
+It is easy to use and it's compilation to html is well supported by many actors (including <a href="http://github.com">Github</a>).</p>
+<p>I found <a href="http://www.mkdocs.org/">MkDocs</a> which is a "fast, simple and downright gorgeous static site generator" from markdown files with a YAML configuration file.</p>
+<h2 id="building-and-hosting">Building and hosting</h2>
+<p>The documentation files are in the <code>documentation/</code> folder of the repository.
+The documentation web site is published in the github pages of the repository thus in the <code>gh-pages</code> branch of the repository.</p>
+<p>As changing branch to build the site with MkDocs is not convenient,
+I first wanted to use subtree to sync <code>gh-pages</code> branch in a folder in <code>master</code> branch.
+But I had bugs with subtree merging. Finally I chose to simply clone the repository in two different folders.</p>
+<p>For the second one I copied only the <code>gh-pages</code> branch with the following command :</p>
+<pre><code>git clone -b gh-pages --single-branch git@github.com:mpizenberg/Singapore_interview.git Singapore_interview_gh-pages/
+</code></pre>
+
+<p>Thus I just need to tell MkDocs were to build the site in <code>mkdocs.yml</code> file :</p>
+<pre><code>site_dir: ../../Singapore_interview_gh-pages
+</code></pre>
+
+<p>Finally, as I can't use the <code>mkdocs build --clean</code> command (which delete the <code>.git/</code> folder of the other repository),
+I made a simple script (<code>build_docsite.sh</code>) to do it for me :</p>
+<pre><code>#!/bin/bash
+rm -rf ../../Singapore_interview_gh-pages/*
+mkdocs build
+</code></pre>
+
 
             </div>
           </div>
