@@ -8,3 +8,5 @@ The work I had to prepare is the following :
 3. [Use SEEDS Superpixels algorithm or any suitable algorithm to segment the cat from background](superpixel.md)
 4. [Create a boundary box for the segmented cat](box.md)
 5. [Document what I did (in a short format)](doc.md)
+
+The repository containing my work is accessible at [https://github.com/mpizenberg/Singapore_interview](https://github.com/mpizenberg/Singapore_interview)
