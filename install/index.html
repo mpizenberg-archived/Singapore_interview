@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation - My Docs</title>
+  <title>Installation - Documentation</title>
   
 
   
@@ -34,7 +34,7 @@
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
       <div class="wy-side-nav-search">
-        <a href=".." class="icon icon-home"> My Docs</a>
+        <a href=".." class="icon icon-home"> Documentation</a>
         
       </div>
 
@@ -110,8 +110,35 @@
           <div role="main">
             <div class="section">
               <h1 id="description-of-the-installation-of-eclipse-and-opencv">Description of the installation of Eclipse and OpenCV</h1>
+<p>Here I describe the Linux installation process for Eclipse and OpenCV</p>
 <h2 id="installation-of-eclipse-on-linux">Installation of Eclipse on linux</h2>
+<ol>
+<li>First you need to download the <a href="http://www.eclipse.org/downloads/">Eclipse IDE for C/C++ Developpers</a>.</li>
+<li>Extract it were you want to install it.</li>
+<li>Add that folder to your path.</li>
+</ol>
+<p>Eclipse is now ready.</p>
 <h2 id="installation-of-opencv">Installation of OpenCV</h2>
+<p>If we want to be able to use the latest functionalities of OpenCV we need to build it from sources.
+There is the <a href="http://docs.opencv.org/trunk/doc/tutorials/introduction/linux_install/linux_install.html">installation procedure</a>.</p>
+<p>First we clone it :</p>
+<pre><code>git clone https://github.com/Itseez/opencv.git
+git clone https://github.com/Itseez/opencv_contrib.git
+</code></pre>
+
+<p>Then configure and build it :</p>
+<pre><code>cd opencv/
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..
+make -j4
+sudo make install
+</code></pre>
+
+<p>Finally we need to assure that the loader will find it (otherwise it will compile but there would be an error at the execution). For that, we just need to put the folder where the libs are installed to the file <code>/etc/ld.so.conf.d/opencv.conf</code>. For me it is :</p>
+<pre><code>/usr/local/lib
+</code></pre>
+
 
             </div>
           </div>
