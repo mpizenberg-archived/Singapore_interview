@@ -135,8 +135,15 @@ make -j4
 sudo make install
 </code></pre>
 
+<blockquote>
+<p>Remark : if we need to use some advanced function (for exemple SEEDS superpixels algorithm) that are in opencv contrib libraries we need to add <code>-DOPENCV_EXTRA_MODULES_PATH=&lt;opencv_contrib&gt;/modules</code> to the cmake options.</p>
+</blockquote>
 <p>Finally we need to assure that the loader will find it (otherwise it will compile but there would be an error at the execution). For that, we just need to put the folder where the libs are installed to the file <code>/etc/ld.so.conf.d/opencv.conf</code>. For me it is :</p>
 <pre><code>/usr/local/lib
+</code></pre>
+
+<p>Then we update it with :</p>
+<pre><code>sudo ldconfig /etc/ld.so.conf
 </code></pre>
 
 
