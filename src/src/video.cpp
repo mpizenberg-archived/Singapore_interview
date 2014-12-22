@@ -6,6 +6,7 @@
  */
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/ximgproc.hpp>
 #include <string>
 #include <iostream>
 #include <stdio.h>
@@ -31,12 +32,21 @@ Mat nextImage(VideoCapture& capture, int frames, int fps, double mspf,
 		resize(imageFull, image, Size(width, height), 0, 0, INTER_LINEAR);
 		// Show our image inside the video window.
 		imshow(videoWindow, image);
-		if (f == frames-1)
+		if (f == frames - 1)
 			imshow(imageWindow, image);
 		if (waitKey(mspf) == 'q')
 			return emptyImage;
 	}
 	return image;
+}
+
+/**
+ * Compute the SEEDS superpixels algorithm to segment the cat.
+ */
+void segmentation(int width, int height, Mat& image, int num_superpixels,
+		int num_levels) {
+	SuperpixelSEEDS seeds = createSuperpixelSEEDS(width, height,
+			image.channels(), num_superpixels, num_levels, 2, 5, false);
 }
 
 int main(int argc, char** argv) {
@@ -64,7 +74,7 @@ int main(int argc, char** argv) {
 	string imageWindow = "Image window";
 	namedWindow(imageWindow, WINDOW_NORMAL);
 	resizeWindow(imageWindow, width, height);
-	moveWindow(imageWindow, 2*50 + width, 100);
+	moveWindow(imageWindow, 2 * 50 + width, 100);
 
 	// get the framerate of the video
 	int fps = (int) capture.get(CAP_PROP_FPS);
@@ -76,8 +86,8 @@ int main(int argc, char** argv) {
 	int currentImage = 0;
 	// infinite loop
 	while (1) {
-		image = nextImage(capture, fps, fps, mspf, videoWindow, imageWindow, width,
-				height);
+		image = nextImage(capture, fps, fps, mspf, videoWindow, imageWindow,
+				width, height);
 		if (image.empty())
 			break;
 		else if (currentImage < 10)
