@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 using namespace cv;
+using namespace ximgproc;
 using namespace std;
 
 /**
@@ -32,6 +33,7 @@ Mat nextImage(VideoCapture& capture, int frames, int fps, double mspf,
 		resize(imageFull, image, Size(width, height), 0, 0, INTER_LINEAR);
 		// Show our image inside the video window.
 		imshow(videoWindow, image);
+		// Show last image in image window
 		if (f == frames - 1)
 			imshow(imageWindow, image);
 		if (waitKey(mspf) == 'q')
@@ -43,10 +45,36 @@ Mat nextImage(VideoCapture& capture, int frames, int fps, double mspf,
 /**
  * Compute the SEEDS superpixels algorithm to segment the cat.
  */
-void segmentation(int width, int height, Mat& image, int num_superpixels,
-		int num_levels) {
-	SuperpixelSEEDS seeds = createSuperpixelSEEDS(width, height,
-			image.channels(), num_superpixels, num_levels, 2, 5, false);
+Mat segmentation(Ptr<SuperpixelSEEDS>& seeds, int *init, int width, int height,
+		Mat& image, int num_superpixels, int num_levels) {
+
+	// initialization of SEEDS superpixels
+	if (!(*init)) {
+		seeds = createSuperpixelSEEDS(width, height, image.channels(),
+				num_superpixels, num_levels, 2, 5, false);
+		*init = true;
+	}
+
+	// superpixels iterations
+	Mat converted;
+	cvtColor(image, converted, COLOR_BGR2HSV);
+	seeds->iterate(converted);
+
+	// retrieve the segmentation result
+	Mat labels;
+	seeds->getLabels(labels);
+	const int num_label_bits = 2;
+	labels &= (1 << num_label_bits) - 1;
+	labels *= 1 << (16 - num_label_bits);
+
+	// get the contours for displaying
+	Mat mask;
+	seeds->getLabelContourMask(mask, false);
+	converted.setTo(Scalar(0, 0, 255), mask);
+
+	return mask;
+	//return labels;
+	//return converted;
 }
 
 int main(int argc, char** argv) {
@@ -60,7 +88,7 @@ int main(int argc, char** argv) {
 	capture.open(argv[1]);
 	// Check if the video is loaded
 	if (!capture.isOpened()) {
-		cout << "Could not open or find the video" << std::endl;
+		cout << "Could not open or find the video" << endl;
 		return EXIT_FAILURE;
 	}
 
@@ -75,6 +103,10 @@ int main(int argc, char** argv) {
 	namedWindow(imageWindow, WINDOW_NORMAL);
 	resizeWindow(imageWindow, width, height);
 	moveWindow(imageWindow, 2 * 50 + width, 100);
+	string segmentedWindow = "Segmented window";
+	namedWindow(segmentedWindow, WINDOW_NORMAL);
+	resizeWindow(segmentedWindow, width, height);
+	moveWindow(segmentedWindow, 2 * 50 + width, 2 * 100 + height);
 
 	// get the framerate of the video
 	int fps = (int) capture.get(CAP_PROP_FPS);
@@ -84,17 +116,32 @@ int main(int argc, char** argv) {
 	// the vector containing 10 images
 	vector<Mat> images;
 	int currentImage = 0;
+
+	// Segmented image of the cat
+	Mat segmentedImage;
+	Ptr<SuperpixelSEEDS> seeds;
+	int init = false;
+	int num_superpixels = 400;
+	int num_levels = 4;
+
 	// infinite loop
 	while (1) {
 		image = nextImage(capture, fps, fps, mspf, videoWindow, imageWindow,
 				width, height);
 		if (image.empty())
 			break;
-		else if (currentImage < 10)
+		// segmentation of the image
+		segmentedImage = segmentation(seeds, &init, width, height, image,
+				num_superpixels, num_levels);
+		imshow(segmentedWindow, segmentedImage);
+		if (waitKey(10) == 'q')
+			break;
+		else if (currentImage < 10) {
 			images.push_back(image.clone());
+		}
 		currentImage++;
 	}
-	// cout << "nombre d'images récupérées : " << to_string(images.size()) << endl;
+	//cout << "Number of images kept : " << to_string(images.size()) << endl;
 
 	return 0;
 }
