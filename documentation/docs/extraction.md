@@ -14,4 +14,4 @@ Mat nextImage(VideoCapture& capture, int frames, int fps, double mspf,
 It reads the video and get the last image (here the "fps" one since we have to wait for fps frames to get the image a second later);
 
 You can see here a screen capture of the result :
-![Screenshot](../img/extraction.png)
+![Screenshot](img/extraction.png)
