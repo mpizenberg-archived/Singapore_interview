@@ -2,10 +2,10 @@
 
 The first exercise consists in extracting 10 frames from that video [https://www.dropbox.com/s/h5wk1rhrqkgec6y/cat.mp4?dl=0](https://www.dropbox.com/s/h5wk1rhrqkgec6y/cat.mp4?dl=0), ideally with one frame every second.
 
-I started by gettting and reading the video file. It is done with the class `VideoCapture`.
+I started by getting and reading the video file. It is done with the class `VideoCapture`.
 To make the computing easier, I reduced the resolution of the video to 800x450 with the `resizeWindow` function.
 
-The variable used to store is 10 images is  : ` vector<Mat> images`.
+The variable used to store the 10 images is  : ` vector<Mat> images`.
 To get only one image per second while still reading the video I made a simple function :
 ```
 Mat nextImage(VideoCapture& capture, int frames, int fps, double mspf,
