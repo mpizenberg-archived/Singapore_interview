@@ -111,6 +111,17 @@
             <div class="section">
               <h1 id="extraction-of-frames-from-a-video">Extraction of frames from a video</h1>
 <p>The first exercise consists in extracting 10 frames from that video <a href="https://www.dropbox.com/s/h5wk1rhrqkgec6y/cat.mp4?dl=0">https://www.dropbox.com/s/h5wk1rhrqkgec6y/cat.mp4?dl=0</a>, ideally with one frame every second.</p>
+<p>I started by gettting and reading the video file. It is done with the class <code>VideoCapture</code>.
+To make the computing easier, I reduced the resolution of the video to 800x450 with the <code>resizeWindow</code> function.</p>
+<p>The variable used to store is 10 images is  : <code>vector&lt;Mat&gt; images</code>.
+To get only one image per second while still reading the video I made a simple function :</p>
+<pre><code>Mat nextImage(VideoCapture&amp; capture, int frames, int fps, double mspf,
+        string videoWindow, string imageWindow, int width, int height);
+</code></pre>
+
+<p>It reads the video and get the last image (here the "fps" one since we have to wait for fps frames to get the image a second later);</p>
+<p>You can see here a screen capture of the result :
+<img alt="Screenshot" src="../../img/extraction.png" /></p>
 
             </div>
           </div>
