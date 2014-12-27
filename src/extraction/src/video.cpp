@@ -43,44 +43,9 @@ Mat nextImage(VideoCapture& capture, int frames, int fps, double mspf,
 	return image;
 }
 
-/**
- * Compute the SEEDS superpixels algorithm to segment the cat.
- */
-Mat segmentation(Ptr<SuperpixelSEEDS>& seeds, int *init, int width, int height,
-		Mat& image, int num_superpixels, int num_levels) {
-
-	// initialization of SEEDS superpixels
-	if (!(*init)) {
-		seeds = createSuperpixelSEEDS(width, height, image.channels(),
-				num_superpixels, num_levels, 2, 5, false);
-		*init = true;
-	}
-
-	// superpixels iterations
-	Mat converted;
-	cvtColor(image, converted, COLOR_BGR2HSV);
-	seeds->iterate(converted);
-
-	// retrieve the segmentation result
-	Mat labels;
-	seeds->getLabels(labels);
-	const int num_label_bits = 2;
-	labels &= (1 << num_label_bits) - 1;
-	labels *= 1 << (16 - num_label_bits);
-
-	// get the contours for displaying
-	Mat mask;
-	seeds->getLabelContourMask(mask, false);
-	converted.setTo(Scalar(0, 0, 255), mask);
-
-	return mask;
-	//return labels;
-	//return converted;
-}
-
 int main(int argc, char** argv) {
 	if (argc != 2) {
-		cout << " Usage: Singapore VideoToLoadAndDisplay" << endl;
+		cout << " Usage: Singapore_extraction VideoToLoadAndDisplay" << endl;
 		return -1;
 	}
 	Mat image;
@@ -104,10 +69,6 @@ int main(int argc, char** argv) {
 	namedWindow(imageWindow, WINDOW_NORMAL);
 	resizeWindow(imageWindow, width, height);
 	moveWindow(imageWindow, 2 * 50 + width, 100);
-	string segmentedWindow = "Segmented window";
-	namedWindow(segmentedWindow, WINDOW_NORMAL);
-	resizeWindow(segmentedWindow, width, height);
-	moveWindow(segmentedWindow, 2 * 50 + width, 2 * 100 + height);
 
 	// get the framerate of the video
 	int fps = (int) capture.get(CAP_PROP_FPS);
@@ -116,7 +77,8 @@ int main(int argc, char** argv) {
 
 	// the vector containing 10 images
 	vector<Mat> images;
-	int currentImage = 0;
+	unsigned int nb_images = 10;
+	unsigned int currentImage = 0;
 
 	// Segmented image of the cat
 	Mat segmentedImage;
@@ -126,18 +88,14 @@ int main(int argc, char** argv) {
 	int num_levels = 4;
 
 	// infinite loop
-	while (currentImage<10) {
+	while (currentImage<nb_images) {
 		image = nextImage(capture, fps, fps, mspf, videoWindow, imageWindow,
 				width, height);
 		if (image.empty())
 			break;
-		// segmentation of the image
-		segmentedImage = segmentation(seeds, &init, width, height, image,
-				num_superpixels, num_levels);
-		imshow(segmentedWindow, segmentedImage);
 		if (waitKey(10) == 'q')
 			break;
-		else if (currentImage < 10) {
+		else {
 			images.push_back(image.clone());
 		}
 		currentImage++;
@@ -165,6 +123,7 @@ int main(int argc, char** argv) {
 			imageName = string(folderAbsolutePath) + "/" + to_string(i) + ".png";
 			imwrite(imageName,images[i]);
 		}
+		cout << to_string(i) << " images have been saved" << endl;
 	}
 
 	return 0;

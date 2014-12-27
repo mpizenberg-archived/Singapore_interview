@@ -116,6 +116,7 @@ int main(int argc, char** argv) {
 			}
 			currentImage++;
 		}
+		cout << to_string(currentImage) << " images have been segmented" << endl;
 	}
 	return 0;
 }
