@@ -11,6 +11,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h> // to check folder existence in UNIX systems
 
 using namespace cv;
 using namespace ximgproc;
@@ -125,7 +126,7 @@ int main(int argc, char** argv) {
 	int num_levels = 4;
 
 	// infinite loop
-	while (1) {
+	while (currentImage<10) {
 		image = nextImage(capture, fps, fps, mspf, videoWindow, imageWindow,
 				width, height);
 		if (image.empty())
@@ -141,7 +142,30 @@ int main(int argc, char** argv) {
 		}
 		currentImage++;
 	}
-	//cout << "Number of images kept : " << to_string(images.size()) << endl;
+
+	// verify the number of images kept
+	cout << "Number of images kept : " << to_string(images.size()) << endl;
+
+	// Folder where to save those images
+	cout << "Folder to save the images (with the / at the end) :" << endl;
+	string folder;
+	cin >> folder;
+
+	// check if the folder exists
+	struct stat sb;
+	if (!( stat(folder.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode) )) {
+	    cout << "The folder " << folder << " does not exist." << endl;
+	} else {
+		char folderAbsolutePath[200];
+		realpath(folder.c_str(),folderAbsolutePath);
+		cout << "Attempt to save the images in the folder " << folderAbsolutePath << " :" << endl;
+		unsigned int i=0;
+		string imageName;
+		for (i = 0; i < images.size(); i++) {
+			imageName = string(folderAbsolutePath) + "/" + to_string(i) + ".png";
+			imwrite(imageName,images[i]);
+		}
+	}
 
 	return 0;
 }
