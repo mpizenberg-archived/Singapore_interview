@@ -15,3 +15,7 @@ It reads the video and get the last image (here the "fps" one since we have to w
 
 You can see here a screen capture of the result :
 ![Screenshot](img/extraction.png)
+
+In order to work later with the images without having to load the video,
+I save the images in a folder chosen by the user (in the terminal).
+That functionality uses UNIX functions and thus only works on Linux or Mac.
