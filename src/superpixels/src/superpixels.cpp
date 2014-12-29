@@ -19,37 +19,41 @@ using namespace std;
 
 /**
  * Compute the SEEDS superpixels algorithm to segment the cat.
+ * The returned vector contains the matrices :
+ * 0. labels
+ * 1. borders
  */
-Mat segmentation(Ptr<SuperpixelSEEDS>& seeds, int *init, int width, int height,
-		Mat& image, int num_superpixels, int num_levels) {
+vector<Mat> segmentation(Ptr<SuperpixelSEEDS>& seeds, int *init, int width,
+		int height, Mat& image, int num_superpixels, int num_levels) {
+
+	vector<Mat> segmentedImages;
 
 	// initialization of SEEDS superpixels
 	if (!(*init)) {
 		seeds = createSuperpixelSEEDS(width, height, image.channels(),
-				num_superpixels, num_levels, 2, 5, false);
+				num_superpixels, num_levels, 1, 5, true);
+		cout << "Number of superpixels created : "
+				<< to_string(seeds->getNumberOfSuperpixels()) << endl;
 		*init = true;
 	}
 
 	// superpixels iterations
 	Mat converted;
-	cvtColor(image, converted, COLOR_BGR2HSV);
+	cvtColor(image, converted, COLOR_BGR2Lab);
 	seeds->iterate(converted);
+	cvtColor(converted, converted, COLOR_Lab2BGR);
 
 	// retrieve the segmentation result
 	Mat labels;
 	seeds->getLabels(labels);
-	const int num_label_bits = 2;
-	labels &= (1 << num_label_bits) - 1;
-	labels *= 1 << (16 - num_label_bits);
+	segmentedImages.push_back(labels.clone());
 
 	// get the contours for displaying
 	Mat mask;
 	seeds->getLabelContourMask(mask, false);
-	converted.setTo(Scalar(0, 0, 255), mask);
+	segmentedImages.push_back(mask.clone());
 
-	return mask;
-	//return labels;
-	//return converted;
+	return segmentedImages;
 }
 
 int main(int argc, char** argv) {
@@ -80,26 +84,39 @@ int main(int argc, char** argv) {
 			return EXIT_FAILURE;
 		}
 
-		// Create a window for video display and image display.
-		int width = 800;
-		int height = 450;
+		// Create windows for images display.
+		int width = 800, widthBorder = 2;
+		int height = 450, heightBorder = 40;
+		// original images
 		string imageWindow = "Image window";
 		namedWindow(imageWindow, WINDOW_NORMAL);
 		resizeWindow(imageWindow, width, height);
-		moveWindow(imageWindow, 50, 100);
+		moveWindow(imageWindow, 50, 50);
+		// borders
+		string bordersWindow = "Borders window";
+		namedWindow(bordersWindow, WINDOW_NORMAL);
+		resizeWindow(bordersWindow, width, height);
+		moveWindow(bordersWindow, 50 + width + widthBorder, 50);
+		// labels
+		string labelsWindow = "Labels window";
+		namedWindow(labelsWindow, WINDOW_NORMAL);
+		resizeWindow(labelsWindow, width, height);
+		moveWindow(labelsWindow, 50 + width + widthBorder, 50 + height + heightBorder);
+		// segmented
 		string segmentedWindow = "Segmented window";
 		namedWindow(segmentedWindow, WINDOW_NORMAL);
 		resizeWindow(segmentedWindow, width, height);
-		moveWindow(segmentedWindow, 2 * 50 + width, 100);
+		moveWindow(segmentedWindow, 50, 50 + height + heightBorder);
 
 		// Configuration of SEEDS superpixels
 		Ptr<SuperpixelSEEDS> seeds;
 		int init = false;
-		int num_superpixels = 400;
+		int num_superpixels = 100;
 		int num_levels = 4;
 
 		// infinite loop
-		Mat image, segmentedImage;
+		Mat image, borders, labels, segmented;
+		vector<Mat> segmentedImages;
 		unsigned int currentImage = 0;
 		while (true) {
 			sequence >> image;
@@ -107,16 +124,40 @@ int main(int argc, char** argv) {
 				break;
 			imshow(imageWindow, image);
 			waitKey(10);
+
 			// segmentation of the image
-			segmentedImage = segmentation(seeds, &init, width, height, image,
+			segmentedImages = segmentation(seeds, &init, width, height, image,
 					num_superpixels, num_levels);
-			imshow(segmentedWindow, segmentedImage);
+			currentImage++;
+
+			// show the borders
+			borders = segmentedImages[1].clone();
+			imshow(bordersWindow, 255*borders);
+			if (waitKey(10) == 'q') {
+				break;
+			}
+
+			// show the labels
+			labels = segmentedImages[0].clone();
+			const int num_label_bits = 3;
+			labels &= (1 << num_label_bits) - 1;
+			labels *= 1 << (16 - num_label_bits);
+			imshow(labelsWindow, labels);
+			if (waitKey(10) == 'q') {
+				break;
+			}
+
+			// show the segmented image
+			segmented = image.clone();
+			segmented.setTo(Scalar(255, 255, 255), borders);
+			imshow(segmentedWindow, segmented);
 			if (waitKey(0) == 'q') {
 				break;
 			}
-			currentImage++;
+
 		}
-		cout << to_string(currentImage) << " images have been segmented" << endl;
+		cout << to_string(currentImage) << " images have been segmented"
+				<< endl;
 	}
 	return 0;
 }
