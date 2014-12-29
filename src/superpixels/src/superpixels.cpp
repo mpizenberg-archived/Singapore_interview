@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
 
 			// show the segmented image
 			segmented = image.clone();
-			segmented.setTo(Scalar(255, 255, 255), borders);
+			segmented.setTo(Scalar(0, 0, 255), borders);
 			imshow(segmentedWindow, segmented);
 			if (waitKey(0) == 'q') {
 				break;
